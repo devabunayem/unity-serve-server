@@ -12,11 +12,25 @@ const eventRoutes = require('./src/routes/eventRoutes');
 const app = express();
 const port = process.env.PORT || 5000;
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://unity-serve-client.vercel.app',
+  process.env.CLIENT_URL,
+].filter(Boolean).map(url => url.replace(/\/$/, ''));
+
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    process.env.CLIENT_URL || 'https://unity-serve-client.vercel.app',
-  ],
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    if (
+      allowedOrigins.includes(normalizedOrigin) ||
+      normalizedOrigin.endsWith('.vercel.app')
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   credentials: true,
 }));
 app.use(express.json());
